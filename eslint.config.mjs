@@ -1,16 +1,35 @@
 import globals from 'globals';
-import pluginJs from '@eslint/js';
+import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import eslintPluginPrettier from 'eslint-plugin-prettier';
 
-/** @type {import('eslint').Linter.Config[]} */
+/** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
-  { extends: ['plugin:js/recommended'] },
+  // Base JavaScript rules
+  js.configs.recommended,
+
+  // TypeScript rules
+  ...tseslint.configs.recommended,
+
+  // Prettier plugin
   {
-    ignores: ['.node_modules/*', '.dist/*'],
+    plugins: {
+      prettier: eslintPluginPrettier,
+    },
+    rules: {
+      'prettier/prettier': 'error',
+    },
   },
-  { languageOptions: { globals: globals.browser } },
+
+  // Custom ESLint rules
   {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        process: 'readonly',
+      },
+    },
+    ignores: ['node_modules/*', 'dist/*'],
     rules: {
       eqeqeq: 'off',
       'no-unused-vars': 'error',
@@ -20,9 +39,4 @@ export default [
       'no-undef': 'error',
     },
   },
-  { files: ['**/*.{js,mjs,cjs,ts}'] },
-  { languageOptions: { globals: { ...globals.browser, process: 'readonly' } } },
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-  eslintPluginPrettierRecommended,
 ];
